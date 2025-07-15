@@ -1,31 +1,33 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { 
   Users, 
   BookOpen, 
   GraduationCap, 
-  Settings, 
-  LogOut,
   Bell,
   Home,
-  Ticket
+  Ticket,
+  Shield,
+  X
 } from 'lucide-react';
 
-const AdminSidebar = () => {
+interface AdminSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
 
   const menuItems = [
     { 
       icon: Bell, 
       label: 'Dashboard', 
       path: '/admin',
-      description: 'View notifications and overview'
+      description: 'Overview & notifications'
     },
     { 
       icon: Users, 
@@ -43,7 +45,7 @@ const AdminSidebar = () => {
       icon: GraduationCap, 
       label: 'Enrollments', 
       path: '/admin/enrollments',
-      description: 'Track student enrollments'
+      description: 'Track student progress'
     },
     { 
       icon: Home, 
@@ -55,71 +57,82 @@ const AdminSidebar = () => {
       icon: Ticket, 
       label: 'Coupons', 
       path: '/admin/coupons',
-      description: 'Manage discount coupons'
+      description: 'Manage discount codes'
     },
   ];
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    onClose(); // Close sidebar on mobile after navigation
   };
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg border-r border-gray-200 z-50">
-      <div className="p-6">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-8 h-8 bg-gradient-to-br from-kiki-purple-500 to-kiki-blue-600 rounded-lg flex items-center justify-center">
-            <Settings className="w-5 h-5 text-white" />
+    <div className="w-64 h-full bg-white shadow-xl border-r border-gray-200 flex flex-col">
+      {/* Sidebar Header */}
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Shield className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Admin Panel</h2>
+              <p className="text-xs text-gray-500">KIKI Learning Hub</p>
+            </div>
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="lg:hidden text-gray-400 hover:text-gray-600"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        
-        <nav className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            
-            return (
-              <Button
-                key={item.path}
-                variant={isActive ? "default" : "ghost"}
-                className={`w-full justify-start h-auto p-3 ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-kiki-purple-600 to-kiki-blue-600 text-white' 
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => navigate(item.path)}
-              >
-                <Icon className="w-5 h-5 mr-3" />
-                <div className="text-left">
-                  <div className="font-medium">{item.label}</div>
-                  <div className={`text-xs ${
-                    isActive ? 'text-white/80' : 'text-gray-500'
-                  }`}>
-                    {item.description}
-                  </div>
+      </div>
+      
+      {/* Navigation Menu */}
+      <nav className="flex-1 p-4 space-y-2">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+          
+          return (
+            <Button
+              key={item.path}
+              variant="ghost"
+              className={`w-full justify-start h-auto p-4 rounded-lg transition-all duration-200 ${
+                isActive 
+                  ? 'bg-red-50 text-red-700 border border-red-200 shadow-sm' 
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+              onClick={() => handleNavigation(item.path)}
+            >
+              <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-red-600' : 'text-gray-500'}`} />
+              <div className="text-left flex-1">
+                <div className={`font-medium ${isActive ? 'text-red-700' : 'text-gray-900'}`}>
+                  {item.label}
                 </div>
-              </Button>
-            );
-          })}
-        </nav>
-
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <Card className="bg-gradient-to-br from-kiki-purple-50 to-kiki-blue-50 border-kiki-purple-200">
-            <CardContent className="p-4">
-              <div className="text-sm text-gray-600 mb-3">
-                <strong>KIKI Learning Hub</strong> Admin Dashboard
+                <div className={`text-xs ${isActive ? 'text-red-600' : 'text-gray-500'}`}>
+                  {item.description}
+                </div>
               </div>
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="w-full border-kiki-purple-200 text-kiki-purple-700 hover:bg-kiki-purple-50"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            </CardContent>
-          </Card>
+            </Button>
+          );
+        })}
+      </nav>
+
+      {/* Sidebar Footer */}
+      <div className="p-4 border-t border-gray-200">
+        <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
+          <div className="text-sm">
+            <div className="font-semibold text-red-800 mb-1">System Status</div>
+            <div className="text-red-600 text-xs">All systems operational</div>
+            <div className="flex items-center mt-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <span className="text-xs text-red-700">Online</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,294 +1,317 @@
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Bell, Check, Eye } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { 
+  Users, 
+  BookOpen, 
+  ShoppingCart, 
+  DollarSign,
+  TrendingUp,
+  Activity,
+  Bell,
+  Eye,
+  UserCheck,
+  BookCheck,
+  CreditCard
+} from 'lucide-react';
 
-interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  user_id: string;
-  order_id: string | null;
-  is_read: boolean;
-  created_at: string;
+interface DashboardStats {
+  totalUsers: number;
+  totalCourses: number;
+  totalOrders: number;
+  totalRevenue: number;
+  recentUsers: number;
+  activeEnrollments: number;
 }
 
 const AdminNotifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    totalCourses: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    recentUsers: 0,
+    activeEnrollments: 0
+  });
   const [loading, setLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
   const { toast } = useToast();
-  const channelRef = React.useRef<any>(null);
 
-  const fetchNotifications = useCallback(async () => {
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
+      setLoading(true);
 
-      if (error) {
-        console.error('Error fetching notifications:', error);
-        // Fallback to creating mock notifications from pending orders
-        const { data: ordersData, error: ordersError } = await supabase
-          .from('orders')
-          .select('*')
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false })
-          .limit(10);
+      // Fetch all stats in parallel
+      const [
+        { count: totalUsers },
+        { count: totalCourses },
+        { count: totalOrders },
+        { data: orders },
+        { count: activeEnrollments }
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('courses').select('*', { count: 'exact', head: true }),
+        supabase.from('orders').select('*', { count: 'exact', head: true }),
+        supabase.from('orders').select('total_amount'),
+        supabase.from('enrollments').select('*', { count: 'exact', head: true }).eq('status', 'enrolled')
+      ]);
 
-        if (!ordersError && ordersData) {
-          const mockNotifications: Notification[] = ordersData.map(order => ({
-            id: order.id,
-            type: 'enrollment_request',
-            title: 'New Enrollment Request',
-            message: `New enrollment request for amount ₹${order.total_amount}`,
-            user_id: order.user_id,
-            order_id: order.id,
-            is_read: false,
-            created_at: order.created_at
-          }));
-          setNotifications(mockNotifications);
-          setUnreadCount(mockNotifications.length);
-        }
-      } else {
-        const notificationData = data as Notification[];
-        setNotifications(notificationData);
-        setUnreadCount(notificationData.filter(n => !n.is_read).length);
-      }
+      // Calculate total revenue
+      const totalRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+
+      // Get recent users (last 7 days)
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const { count: recentUsers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', weekAgo.toISOString());
+
+      setStats({
+        totalUsers: totalUsers || 0,
+        totalCourses: totalCourses || 0,
+        totalOrders: totalOrders || 0,
+        totalRevenue: totalRevenue,
+        recentUsers: recentUsers || 0,
+        activeEnrollments: activeEnrollments || 0
+      });
+
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('Error fetching dashboard stats:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch notifications.",
+        description: "Failed to fetch dashboard statistics",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  };
 
-  useEffect(() => {
-    fetchNotifications();
-    
-    // Set up real-time subscription only once
-    if (!channelRef.current) {
-      channelRef.current = supabase
-        .channel(`admin-notifications-${Math.random()}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'notifications'
-          },
-          (payload) => {
-            console.log('New notification:', payload);
-            const newNotification = payload.new as Notification;
-            
-            // Prevent duplicate notifications
-            setNotifications(prev => {
-              const exists = prev.find(n => n.id === newNotification.id);
-              if (exists) return prev;
-              return [newNotification, ...prev];
-            });
-            
-            setUnreadCount(prev => prev + 1);
-            
-            // Show toast for new notification with duplicate prevention
-            const toastKey = `admin-notification-${newNotification.id}`;
-            if (!sessionStorage.getItem(toastKey)) {
-              sessionStorage.setItem(toastKey, 'shown');
-              setTimeout(() => sessionStorage.removeItem(toastKey), 5000);
-              
-              toast({
-                title: "New Enrollment Request",
-                description: "A new enrollment request has been submitted.",
-              });
-            }
-          }
-        )
-        .subscribe();
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(amount);
+  };
+
+  const statCards = [
+    {
+      title: 'Total Users',
+      value: stats.totalUsers.toLocaleString(),
+      icon: Users,
+      color: 'bg-blue-500',
+      change: `+${stats.recentUsers} this week`,
+      changeType: 'positive'
+    },
+    {
+      title: 'Total Courses',
+      value: stats.totalCourses.toLocaleString(),
+      icon: BookOpen,
+      color: 'bg-green-500',
+      change: 'Active courses',
+      changeType: 'neutral'
+    },
+    {
+      title: 'Total Orders',
+      value: stats.totalOrders.toLocaleString(),
+      icon: ShoppingCart,
+      color: 'bg-purple-500',
+      change: 'All time orders',
+      changeType: 'neutral'
+    },
+    {
+      title: 'Total Revenue',
+      value: formatCurrency(stats.totalRevenue),
+      icon: DollarSign,
+      color: 'bg-red-500',
+      change: 'Gross revenue',
+      changeType: 'positive'
     }
+  ];
 
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
-  }, [fetchNotifications, toast]);
-
-  const markAsRead = useCallback(async (notificationId: string) => {
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true, updated_at: new Date().toISOString() })
-        .eq('id', notificationId);
-
-      if (error) {
-        console.error('Error marking notification as read:', error);
-      }
-
-      // Update local state
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId ? { ...n, is_read: true } : n
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+  const quickStats = [
+    {
+      label: 'Active Enrollments',
+      value: stats.activeEnrollments,
+      icon: UserCheck,
+      color: 'text-green-600'
+    },
+    {
+      label: 'Recent Signups',
+      value: stats.recentUsers,
+      icon: TrendingUp,
+      color: 'text-blue-600'
+    },
+    {
+      label: 'Course Completion',
+      value: '85%',
+      icon: BookCheck,
+      color: 'text-purple-600'
     }
-  }, []);
-
-  const markAllAsRead = useCallback(async () => {
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true, updated_at: new Date().toISOString() })
-        .eq('is_read', false);
-
-      if (error) {
-        console.error('Error marking all notifications as read:', error);
-      }
-
-      // Update local state regardless
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true }))
-      );
-      setUnreadCount(0);
-
-      toast({
-        title: "Success",
-        description: "All notifications marked as read.",
-      });
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-      toast({
-        title: "Error",
-        description: "Failed to mark notifications as read.",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
-  const getNotificationIcon = useCallback((type: string) => {
-    switch (type) {
-      case 'enrollment_request':
-        return <Bell className="h-4 w-4" />;
-      default:
-        return <Bell className="h-4 w-4" />;
-    }
-  }, []);
-
-  const getNotificationColor = useCallback((type: string) => {
-    switch (type) {
-      case 'enrollment_request':
-        return 'bg-blue-50 border-blue-200';
-      default:
-        return 'bg-gray-50 border-gray-200';
-    }
-  }, []);
-
-  // Memoize the notification list
-  const notificationsList = useMemo(() => {
-    return notifications.map((notification) => (
-      <div
-        key={notification.id}
-        className={`p-3 rounded-lg border ${getNotificationColor(notification.type)} ${
-          !notification.is_read ? 'border-l-4 border-l-blue-500' : ''
-        }`}
-      >
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3 flex-1">
-            <div className="flex-shrink-0 mt-1">
-              {getNotificationIcon(notification.type)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="font-medium text-sm">{notification.title}</h4>
-                {!notification.is_read && (
-                  <Badge variant="secondary" className="text-xs">New</Badge>
-                )}
-              </div>
-              <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-              <p className="text-xs text-gray-500">
-                {formatDistanceToNow(new Date(notification.created_at))} ago
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 ml-2">
-            {!notification.is_read && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => markAsRead(notification.id)}
-                className="h-8 w-8 p-0"
-              >
-                <Eye className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    ));
-  }, [notifications, getNotificationIcon, getNotificationColor, markAsRead]);
+  ];
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center">Loading notifications...</div>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-20 bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <div className="space-y-6">
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-lg p-6 text-white">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Notifications
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {unreadCount}
-              </Badge>
-            )}
-          </CardTitle>
-          {unreadCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={markAllAsRead}
-            >
-              <Check className="h-4 w-4 mr-1" />
-              Mark All Read
-            </Button>
-          )}
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Welcome to Admin Dashboard</h1>
+            <p className="text-red-100">Monitor and manage your learning platform</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+              <Activity className="w-4 h-4 mr-1" />
+              Live Dashboard
+            </Badge>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        {notifications.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            No notifications yet
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index} className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    <p className={`text-sm mt-1 ${
+                      stat.changeType === 'positive' ? 'text-green-600' : 
+                      stat.changeType === 'negative' ? 'text-red-600' : 'text-gray-500'
+                    }`}>
+                      {stat.change}
+                    </p>
+                  </div>
+                  <div className={`w-12 h-12 rounded-full ${stat.color} flex items-center justify-center`}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Quick Stats and Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Stats */}
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-red-600" />
+                Quick Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {quickStats.map((stat, index) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                      <Icon className={`w-8 h-8 ${stat.color}`} />
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                        <p className="text-sm text-gray-600">{stat.label}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-red-600" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button 
+              className="w-full justify-start bg-red-600 hover:bg-red-700 text-white"
+              onClick={() => window.location.href = '/admin/users'}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Manage Users
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start border-red-200 text-red-700 hover:bg-red-50"
+              onClick={() => window.location.href = '/admin/courses'}
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Add New Course
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start border-red-200 text-red-700 hover:bg-red-50"
+              onClick={() => window.location.href = '/admin/enrollments'}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Reports
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* System Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-red-600" />
+            System Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+              <span className="text-green-800 font-medium">Database</span>
+              <Badge className="bg-green-500 text-white">Operational</Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+              <span className="text-green-800 font-medium">Authentication</span>
+              <Badge className="bg-green-500 text-white">Operational</Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+              <span className="text-green-800 font-medium">File Storage</span>
+              <Badge className="bg-green-500 text-white">Operational</Badge>
+            </div>
           </div>
-        ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {notificationsList}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
