@@ -1,11 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="bg-gray-900 text-white">
+  return <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
@@ -20,28 +17,13 @@ const Footer = () => {
               Empowering minds through innovative learning experiences. Join us in shaping the future of education with personalized, engaging programs for all ages.
             </p>
             <div className="flex space-x-4">
-              <a 
-                href="https://www.facebook.com/share/16cJ2N9GxA/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-kiki-blue-400 transition-colors"
-              >
+              <a href="https://www.facebook.com/share/16cJ2N9GxA/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-kiki-blue-400 transition-colors">
                 <Facebook className="h-6 w-6" />
               </a>
-              <a 
-                href="https://www.instagram.com/kikislearninghubklh?igsh=eTFldGVld2txMjV1" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-kiki-blue-400 transition-colors"
-              >
+              <a href="https://www.instagram.com/kikislearninghubklh?igsh=eTFldGVld2txMjV1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-kiki-blue-400 transition-colors">
                 <Instagram className="h-6 w-6" />
               </a>
-              <a 
-                href="https://www.linkedin.com/in/krithika-tamilselvan-997833125?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-kiki-blue-400 transition-colors"
-              >
+              <a href="https://www.linkedin.com/in/krithika-tamilselvan-997833125?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-kiki-blue-400 transition-colors">
                 <Linkedin className="h-6 w-6" />
               </a>
             </div>
@@ -80,15 +62,15 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-kiki-blue-400" />
-                <span className="text-gray-300 text-sm">info@kikislearning.com</span>
+                <span className="text-gray-300 text-sm">kikislearninghubklh@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-kiki-blue-400" />
-                <span className="text-gray-300 text-sm">+91 12345 67890</span>
+                <span className="text-gray-300 text-sm">+91 82208 79805</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-kiki-blue-400" />
-                <span className="text-gray-300 text-sm">Chennai, Tamil Nadu</span>
+                <span className="text-gray-300 text-sm mx-[21px]">A global hub for ideas and innovation</span>
               </div>
             </div>
           </div>
@@ -106,8 +88,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
