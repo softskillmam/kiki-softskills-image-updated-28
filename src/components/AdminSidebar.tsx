@@ -63,7 +63,10 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
 
   const handleNavigation = (path: string) => {
     navigate(path);
-    onClose(); // Close sidebar on mobile after navigation
+    // Close sidebar on mobile after navigation
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
   };
 
   return (
@@ -84,7 +87,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="lg:hidden text-gray-400 hover:text-gray-600"
+            className="lg:hidden text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -108,12 +111,12 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
               }`}
               onClick={() => handleNavigation(item.path)}
             >
-              <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-red-600' : 'text-gray-500'}`} />
-              <div className="text-left flex-1">
-                <div className={`font-medium ${isActive ? 'text-red-700' : 'text-gray-900'}`}>
+              <Icon className={`w-5 h-5 mr-3 flex-shrink-0 ${isActive ? 'text-red-600' : 'text-gray-500'}`} />
+              <div className="text-left flex-1 min-w-0">
+                <div className={`font-medium truncate ${isActive ? 'text-red-700' : 'text-gray-900'}`}>
                   {item.label}
                 </div>
-                <div className={`text-xs ${isActive ? 'text-red-600' : 'text-gray-500'}`}>
+                <div className={`text-xs truncate ${isActive ? 'text-red-600' : 'text-gray-500'}`}>
                   {item.description}
                 </div>
               </div>

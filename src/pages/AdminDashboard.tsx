@@ -4,7 +4,7 @@ import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Menu, X, Eye, LogOut } from 'lucide-react';
+import { Loader2, Menu, Eye, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AdminSidebar from '@/components/AdminSidebar';
 import UserManagement from '@/components/UserManagement';
@@ -84,10 +84,10 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out ${
+      {/* Sidebar - Fixed positioning */}
+      <div className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0`}>
+      }`}>
         <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       </div>
 
@@ -99,21 +99,21 @@ const AdminDashboard = () => {
         />
       )}
 
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
+      {/* Main Content - Adjusts based on sidebar state */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
+        isSidebarOpen ? 'lg:ml-64' : 'ml-0'
       }`}>
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               >
-                {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                <Menu className="h-5 w-5" />
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -127,7 +127,7 @@ const AdminDashboard = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleViewSite}
-                className="text-gray-600 hover:text-gray-900 border-gray-300"
+                className="text-gray-600 hover:text-gray-900 border-gray-300 hover:bg-gray-50"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 View Site
@@ -146,7 +146,7 @@ const AdminDashboard = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-auto">
           <div className="max-w-7xl mx-auto">
             <Routes>
               <Route path="/" element={<AdminNotifications />} />
