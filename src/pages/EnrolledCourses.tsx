@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Calendar, Clock, Eye, FileText, Download, Loader2 } from 'lucide-react';
+import { BookOpen, Calendar, Clock, Eye, FileText, Download, Loader2, RefreshCw } from 'lucide-react';
 import ExploreButton from '@/components/ExploreButton';
 
 interface Course {
@@ -55,6 +54,7 @@ const EnrolledCourses = () => {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('enrolled');
 
   // MBTI course ID to exclude from enrollments listing
@@ -64,13 +64,98 @@ const EnrolledCourses = () => {
     if (user) {
       fetchEnrollments();
       fetchOrders();
+      setupRealtimeSubscription();
     }
   }, [user]);
+
+  const setupRealtimeSubscription = () => {
+    if (!user?.id) return;
+
+    console.log('Setting up real-time subscription for user:', user.id);
+
+    // Subscribe to changes in enrollments table for this user
+    const enrollmentChannel = supabase
+      .channel('user-enrollments')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'enrollments',
+          filter: `student_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Enrollment change detected:', payload);
+          
+          // Show toast notification for status changes
+          if (payload.eventType === 'UPDATE' && payload.new && payload.old) {
+            const oldStatus = payload.old.status;
+            const newStatus = payload.new.status;
+            
+            if (oldStatus !== newStatus) {
+              toast({
+                title: "Enrollment Status Updated",
+                description: `Your enrollment status has been changed to ${newStatus}`,
+              });
+            }
+          }
+          
+          // Refresh enrollments data
+          fetchEnrollments();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Enrollment subscription status:', status);
+      });
+
+    // Subscribe to changes in orders table for this user
+    const orderChannel = supabase
+      .channel('user-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Order change detected:', payload);
+          
+          // Show toast notification for order status changes
+          if (payload.eventType === 'UPDATE' && payload.new && payload.old) {
+            const oldStatus = payload.old.status;
+            const newStatus = payload.new.status;
+            
+            if (oldStatus !== newStatus) {
+              toast({
+                title: "Order Status Updated",
+                description: `Your order status has been changed to ${newStatus}`,
+              });
+            }
+          }
+          
+          // Refresh orders data
+          fetchOrders();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Order subscription status:', status);
+      });
+
+    // Cleanup subscriptions on unmount
+    return () => {
+      console.log('Cleaning up real-time subscriptions');
+      supabase.removeChannel(enrollmentChannel);
+      supabase.removeChannel(orderChannel);
+    };
+  };
 
   const fetchEnrollments = async () => {
     if (!user?.id) return;
 
     try {
+      console.log('Fetching enrollments for user:', user.id);
       const { data, error } = await supabase
         .from('enrollments')
         .select(`
@@ -96,6 +181,7 @@ const EnrolledCourses = () => {
         course: enrollment.courses
       })) as Enrollment[];
 
+      console.log('Enrollments fetched:', enrollmentsData);
       setEnrollments(enrollmentsData || []);
     } catch (error) {
       console.error('Error fetching enrollments:', error);
@@ -106,6 +192,7 @@ const EnrolledCourses = () => {
     if (!user?.id) return;
 
     try {
+      console.log('Fetching orders for user:', user.id);
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -134,12 +221,23 @@ const EnrolledCourses = () => {
         })) || []
       })).filter(order => order.order_items.length > 0) as Order[]; // Only show orders with non-MBTI courses
 
+      console.log('Orders fetched:', ordersData);
       setOrders(ordersData || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchEnrollments(), fetchOrders()]);
+    setRefreshing(false);
+    toast({
+      title: "Success",
+      description: "Data refreshed successfully.",
+    });
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -183,9 +281,25 @@ const EnrolledCourses = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-kiki-purple-50 to-kiki-blue-50 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Learning Dashboard</h1>
-          <p className="text-gray-600">Track your progress and manage your enrolled courses</p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Learning Dashboard</h1>
+            <p className="text-gray-600">Track your progress and manage your enrolled courses</p>
+          </div>
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            {refreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Refresh
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
