@@ -6,7 +6,6 @@ import BenefitsSection from "@/components/BenefitsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import TrustedPartners from "@/components/TrustedPartners";
 import ComparisonSection from "@/components/ComparisonSection";
-import ReferralProgram from "@/components/ReferralProgram";
 
 const Index = () => {
   return (
@@ -17,7 +16,6 @@ const Index = () => {
       <TestimonialsSection />
       <TrustedPartners />
       <ComparisonSection />
-      <ReferralProgram />
     </>
   );
 };

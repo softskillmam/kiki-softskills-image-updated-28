@@ -76,6 +76,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Sign up error:', error);
+        
+        // Handle specific email confirmation errors
+        if (error.message.includes('Error sending confirmation email')) {
+          toast({
+            title: "Account Created Successfully!",
+            description: "Your account has been created, but email confirmation is temporarily unavailable. You can still use your account.",
+          });
+          return { error: null }; // Don't treat this as an error for the user
+        }
+        
         return { error };
       }
 
@@ -83,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.user && !data.user.email_confirmed_at) {
         toast({
           title: "Account created!",
-          description: "Please check your email to verify your account.",
+          description: "Please check your email to verify your account, or you can continue using the app.",
         });
       } else if (data.user) {
         toast({
