@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+
 const Footer = () => {
   const footerLinks = {
     programs: [{
@@ -46,7 +47,9 @@ const Footer = () => {
       href: '/partnership'
     }]
   };
-  return <footer className="bg-gray-900 text-white">
+
+  return (
+    <footer className="bg-gray-900 text-white">
       {/* Main footer content */}
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -72,17 +75,23 @@ const Footer = () => {
             </div>
             
             <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
-                <Facebook className="h-5 w-5" />
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800" asChild>
+                <a href="https://www.facebook.com/share/16cJ2N9GxA/" target="_blank" rel="noopener noreferrer">
+                  <Facebook className="h-5 w-5" />
+                </a>
               </Button>
               <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
                 <Twitter className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
-                <Instagram className="h-5 w-5" />
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800" asChild>
+                <a href="https://www.instagram.com/kikislearninghubklh?igsh=eTFldGVld2txMjV1" target="_blank" rel="noopener noreferrer">
+                  <Instagram className="h-5 w-5" />
+                </a>
               </Button>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
-                <Linkedin className="h-5 w-5" />
+              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800" asChild>
+                <a href="https://www.linkedin.com/in/krithika-tamilselvan-997833125?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer">
+                  <Linkedin className="h-5 w-5" />
+                </a>
               </Button>
             </div>
           </div>
@@ -91,11 +100,13 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Programs</h3>
             <ul className="space-y-3">
-              {footerLinks.programs.map(link => <li key={link.name}>
+              {footerLinks.programs.map(link => (
+                <li key={link.name}>
                   <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
                     {link.name}
                   </Link>
-                </li>)}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -103,11 +114,13 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Support</h3>
             <ul className="space-y-3">
-              {footerLinks.support.map(link => <li key={link.name}>
+              {footerLinks.support.map(link => (
+                <li key={link.name}>
                   <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
                     {link.name}
                   </Link>
-                </li>)}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -140,11 +153,6 @@ const Footer = () => {
               <span className="text-gray-400">A global hub for ideas and innovation</span>
             </div>
           </div>
-          
-          {/* UPI ID */}
-          <div className="mt-6 text-center">
-            
-          </div>
         </div>
       </div>
 
@@ -169,6 +177,8 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;

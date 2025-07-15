@@ -48,7 +48,7 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
   const [selectedContent, setSelectedContent] = useState<CourseContent | null>(null);
   const [contentProgress, setContentProgress] = useState<ContentProgress[]>([]);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     fetchCourseSections();
@@ -59,6 +59,8 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
 
   const fetchCourseSections = async () => {
     try {
+      console.log('Fetching course sections for courseId:', courseId);
+      
       const { data, error } = await supabase
         .from('course_sections')
         .select(`
@@ -78,14 +80,26 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
         return;
       }
 
+      console.log('Fetched sections data:', data);
+
       const sectionsWithSortedContents = (data || []).map(section => ({
         ...section,
         course_contents: (section.course_contents || []).sort((a, b) => a.order_index - b.order_index)
       }));
 
       setSections(sectionsWithSortedContents as CourseSection[]);
+      
+      // Auto-expand the first section if there are sections
+      if (sectionsWithSortedContents.length > 0) {
+        setOpenSections(new Set([sectionsWithSortedContents[0].id]));
+      }
     } catch (error) {
       console.error('Error fetching course sections:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch course sections.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -463,7 +477,7 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
         </div>
         
         <div className="lg:sticky lg:top-4">
-          {selectedContent && isEnrolled ? (
+          {selectedContent && (isEnrolled || selectedContent.type === 'text') ? (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
