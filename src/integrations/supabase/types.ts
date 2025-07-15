@@ -605,8 +605,6 @@ export type Database = {
           id: string
           mbti_quiz_completed: boolean | null
           phone: string | null
-          referral_code: string | null
-          referred_by: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           show_mbti_reminder: boolean | null
           updated_at: string | null
@@ -619,8 +617,6 @@ export type Database = {
           id: string
           mbti_quiz_completed?: boolean | null
           phone?: string | null
-          referral_code?: string | null
-          referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           show_mbti_reminder?: boolean | null
           updated_at?: string | null
@@ -633,76 +629,11 @@ export type Database = {
           id?: string
           mbti_quiz_completed?: boolean | null
           phone?: string | null
-          referral_code?: string | null
-          referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           show_mbti_reminder?: boolean | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_referred_by_fkey"
-            columns: ["referred_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      referrals: {
-        Row: {
-          created_at: string
-          id: string
-          order_id: string | null
-          referral_bonus: number | null
-          referred_user_id: string
-          referrer_id: string
-          status: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          referral_bonus?: number | null
-          referred_user_id: string
-          referrer_id: string
-          status?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          order_id?: string | null
-          referral_bonus?: number | null
-          referred_user_id?: string
-          referrer_id?: string
-          status?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "referrals_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referrals_referred_user_id_fkey"
-            columns: ["referred_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referrals_referrer_id_fkey"
-            columns: ["referrer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       resources: {
         Row: {
@@ -762,10 +693,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
