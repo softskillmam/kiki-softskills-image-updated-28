@@ -51,15 +51,23 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    fetchCourseSections();
-    if (isEnrolled && user) {
-      fetchContentProgress();
+    if (courseId) {
+      fetchCourseSections();
+      if (isEnrolled && user) {
+        fetchContentProgress();
+      }
     }
   }, [courseId, isEnrolled, user]);
 
   const fetchCourseSections = async () => {
+    if (!courseId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       console.log('Fetching course sections for courseId:', courseId);
+      setLoading(true);
       
       const { data, error } = await supabase
         .from('course_sections')
@@ -77,6 +85,7 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
           description: "Failed to fetch course sections.",
           variant: "destructive",
         });
+        setSections([]);
         return;
       }
 
@@ -100,6 +109,7 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
         description: "Failed to fetch course sections.",
         variant: "destructive",
       });
+      setSections([]);
     } finally {
       setLoading(false);
     }
@@ -109,8 +119,6 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
     if (!user?.id) return;
 
     try {
-      // In a real app, you'd have a separate table for content progress
-      // For now, we'll use localStorage to simulate progress tracking
       const savedProgress = localStorage.getItem(`course_progress_${courseId}_${user.id}`);
       if (savedProgress) {
         setContentProgress(JSON.parse(savedProgress));
@@ -135,7 +143,6 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
     setContentProgress(newProgress);
     localStorage.setItem(`course_progress_${courseId}_${user.id}`, JSON.stringify(newProgress));
 
-    // Update overall course progress
     updateCourseProgress(newProgress);
   };
 
@@ -212,7 +219,6 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
   const getEmbedUrl = (url: string | null) => {
     if (!url) return null;
 
-    // YouTube URLs
     if (url.includes('youtube.com/watch?v=') || url.includes('youtu.be/')) {
       const videoId = url.includes('youtube.com/watch?v=') 
         ? url.split('v=')[1]?.split('&')[0]
@@ -220,7 +226,6 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
       return `https://www.youtube.com/embed/${videoId}`;
     }
 
-    // Google Drive URLs
     if (url.includes('drive.google.com')) {
       if (url.includes('/file/d/')) {
         const fileId = url.split('/file/d/')[1]?.split('/')[0];
@@ -232,14 +237,12 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
       }
     }
 
-    // Return original URL if it's already an embed URL or other supported format
     return url;
   };
 
   const renderContentViewer = (content: CourseContent) => {
     if (!content.content_url) return null;
 
-    // Check if it's a document type that should use FileViewer
     const getFileExtension = (url: string): string => {
       try {
         const urlObject = new URL(url);
@@ -253,7 +256,6 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
     const extension = getFileExtension(content.content_url);
     const documentExtensions = ['pdf', 'ppt', 'pptx', 'doc', 'docx'];
 
-    // For document files, use the FileViewer component
     if (content.type === 'document' || documentExtensions.includes(extension)) {
       return (
         <FileViewer 
@@ -264,7 +266,6 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
       );
     }
 
-    // For video content, provide better iframe rendering
     if (content.type === 'video') {
       const embedUrl = getEmbedUrl(content.content_url);
       
@@ -299,7 +300,6 @@ const CourseSections = ({ courseId, isEnrolled = false }: CourseSectionsProps) =
       );
     }
 
-    // For other content types, use the existing logic
     const embedUrl = getEmbedUrl(content.content_url);
     
     if (!embedUrl) {

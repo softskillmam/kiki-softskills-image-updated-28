@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -172,11 +172,10 @@ const EnrolledCourses = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-kiki-purple-50 to-kiki-blue-50 py-8">
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-kiki-purple-600" />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -335,7 +334,6 @@ const EnrolledCourses = () => {
           </TabsContent>
         </Tabs>
       </div>
-      <Footer />
     </div>
   );
 };

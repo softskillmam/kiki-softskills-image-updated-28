@@ -1,179 +1,108 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Heart, Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react';
 
 const Footer = () => {
-  const footerLinks = {
-    programs: [{
-      name: 'Kids Programs',
-      href: '/collections?category=kids'
-    }, {
-      name: 'Teen Workshops',
-      href: '/collections?category=teens'
-    }, {
-      name: 'Parent Resources',
-      href: '/collections?category=parents'
-    }, {
-      name: 'Professional Courses',
-      href: '/collections?category=professionals'
-    }],
-    support: [{
-      name: 'Help Center',
-      href: '/help'
-    }, {
-      name: 'Contact Us',
-      href: '/contact'
-    }, {
-      name: 'Terms of Service',
-      href: '/terms'
-    }, {
-      name: 'Privacy Policy',
-      href: '/privacy'
-    }],
-    company: [{
-      name: 'About Us',
-      href: '/about'
-    }, {
-      name: 'Blog',
-      href: '/blog'
-    }, {
-      name: 'Careers',
-      href: '/careers'
-    }, {
-      name: 'Partner with Us',
-      href: '/partnership'
-    }]
-  };
-
   return (
     <footer className="bg-gray-900 text-white">
-      {/* Main footer content */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand section */}
-          <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center space-x-2 mb-6">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-kiki-purple-500 to-kiki-blue-500"></div>
-              <span className="text-xl font-bold">KIKI's Learning Hub</span>
-            </Link>
-            
-            {/* Vision and Mission */}
-            <div className="mb-6">
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-kiki-purple-300 mb-2">Vision</h4>
-                <p className="text-gray-400 text-sm leading-relaxed">"Empowering individuals to lead creating courageous, capable changemakers for tomorrow."</p>
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Logo and Description */}
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-kiki-purple-500 to-kiki-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">K</span>
               </div>
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-kiki-purple-300 mb-2">Mission</h4>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  "Equipping individuals to unlock clarity, grow in confidence, and adapt with strength in a rapidly evolving world."
-                </p>
-              </div>
+              <h3 className="text-xl font-bold">KIKI's Learning Hub</h3>
             </div>
-            
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800" asChild>
-                <a href="https://www.facebook.com/share/16cJ2N9GxA/" target="_blank" rel="noopener noreferrer">
-                  <Facebook className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
-                <Twitter className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800" asChild>
-                <a href="https://www.instagram.com/kikislearninghubklh?igsh=eTFldGVld2txMjV1" target="_blank" rel="noopener noreferrer">
-                  <Instagram className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800" asChild>
-                <a href="https://www.linkedin.com/in/krithika-tamilselvan-997833125?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer">
-                  <Linkedin className="h-5 w-5" />
-                </a>
-              </Button>
-            </div>
-          </div>
-
-          {/* Programs */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Programs</h3>
-            <ul className="space-y-3">
-              {footerLinks.programs.map(link => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Support</h3>
-            <ul className="space-y-3">
-              {footerLinks.support.map(link => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Stay Updated</h3>
-            <p className="text-gray-400 mb-4">Subscribe to our newsletter for the latest programs and updates.</p>
-            <div className="space-y-3">
-              <Input placeholder="Enter your email" className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500" />
-              <Button className="w-full bg-kiki-purple-600 hover:bg-kiki-purple-700">
-                Subscribe
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact info */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-kiki-purple-400" />
-              <span className="text-gray-400">kikislearninghubklh@gmail.com</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-kiki-purple-400" />
-              <span className="text-gray-400">+91 8220879805</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <MapPin className="h-5 w-5 text-kiki-purple-400" />
-              <span className="text-gray-400">A global hub for ideas and innovation</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom footer */}
-      <div className="border-t border-gray-800">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
-              © 2024 KIKI's Learning Hub. All rights reserved.
+            <p className="text-gray-300 mb-6 max-w-md">
+              Empowering minds through innovative learning experiences. Join us in shaping the future of education with personalized, engaging programs for all ages.
             </p>
-            <div className="flex space-x-6 text-sm">
-              <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">
-                Terms
-              </Link>
-              <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">
-                Privacy
-              </Link>
-              <Link to="/cookies" className="text-gray-400 hover:text-white transition-colors">
-                Cookies
-              </Link>
+            <div className="flex space-x-4">
+              <a 
+                href="https://www.facebook.com/share/16cJ2N9GxA/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-kiki-blue-400 transition-colors"
+              >
+                <Facebook className="h-6 w-6" />
+              </a>
+              <a 
+                href="https://www.instagram.com/kikislearninghubklh?igsh=eTFldGVld2txMjV1" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-kiki-blue-400 transition-colors"
+              >
+                <Instagram className="h-6 w-6" />
+              </a>
+              <a 
+                href="https://www.linkedin.com/in/krithika-tamilselvan-997833125?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-kiki-blue-400 transition-colors"
+              >
+                <Linkedin className="h-6 w-6" />
+              </a>
             </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/" className="text-gray-300 hover:text-kiki-blue-400 transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-gray-300 hover:text-kiki-blue-400 transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/programs" className="text-gray-300 hover:text-kiki-blue-400 transition-colors">
+                  Programs
+                </Link>
+              </li>
+              <li>
+                <Link to="/career-test" className="text-gray-300 hover:text-kiki-blue-400 transition-colors">
+                  Career Test
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <Mail className="h-5 w-5 text-kiki-blue-400" />
+                <span className="text-gray-300 text-sm">info@kikislearning.com</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="h-5 w-5 text-kiki-blue-400" />
+                <span className="text-gray-300 text-sm">+91 12345 67890</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <MapPin className="h-5 w-5 text-kiki-blue-400" />
+                <span className="text-gray-300 text-sm">Chennai, Tamil Nadu</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-400 text-sm">
+            © 2024 KIKI's Learning Hub. All rights reserved.
+          </p>
+          <div className="flex items-center space-x-1 mt-4 md:mt-0">
+            <span className="text-gray-400 text-sm">Made with</span>
+            <Heart className="h-4 w-4 text-red-500" />
+            <span className="text-gray-400 text-sm">for education</span>
           </div>
         </div>
       </div>
