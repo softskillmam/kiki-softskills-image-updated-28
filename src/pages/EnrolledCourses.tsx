@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,22 +65,22 @@ const EnrolledCourses = () => {
     if (user) {
       fetchEnrollments();
       fetchOrders();
-      setupRealtimeSubscription();
+      setupRealtimeSubscriptions();
     }
   }, [user]);
 
-  const setupRealtimeSubscription = () => {
+  const setupRealtimeSubscriptions = () => {
     if (!user?.id) return;
 
-    console.log('Setting up real-time subscription for user:', user.id);
+    console.log('Setting up real-time subscriptions for user:', user.id);
 
-    // Subscribe to changes in enrollments table for this user
+    // Subscribe to enrollment changes
     const enrollmentChannel = supabase
       .channel('user-enrollments')
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'enrollments',
           filter: `student_id=eq.${user.id}`
@@ -87,7 +88,6 @@ const EnrolledCourses = () => {
         (payload) => {
           console.log('Enrollment change detected:', payload);
           
-          // Show toast notification for status changes
           if (payload.eventType === 'UPDATE' && payload.new && payload.old) {
             const oldStatus = payload.old.status;
             const newStatus = payload.new.status;
@@ -100,15 +100,13 @@ const EnrolledCourses = () => {
             }
           }
           
-          // Refresh enrollments data
+          // Refresh data
           fetchEnrollments();
         }
       )
-      .subscribe((status) => {
-        console.log('Enrollment subscription status:', status);
-      });
+      .subscribe();
 
-    // Subscribe to changes in orders table for this user
+    // Subscribe to order changes
     const orderChannel = supabase
       .channel('user-orders')
       .on(
@@ -122,7 +120,6 @@ const EnrolledCourses = () => {
         (payload) => {
           console.log('Order change detected:', payload);
           
-          // Show toast notification for order status changes
           if (payload.eventType === 'UPDATE' && payload.new && payload.old) {
             const oldStatus = payload.old.status;
             const newStatus = payload.new.status;
@@ -135,15 +132,13 @@ const EnrolledCourses = () => {
             }
           }
           
-          // Refresh orders data
+          // Refresh data
           fetchOrders();
         }
       )
-      .subscribe((status) => {
-        console.log('Order subscription status:', status);
-      });
+      .subscribe();
 
-    // Cleanup subscriptions on unmount
+    // Cleanup function
     return () => {
       console.log('Cleaning up real-time subscriptions');
       supabase.removeChannel(enrollmentChannel);
@@ -163,7 +158,7 @@ const EnrolledCourses = () => {
           courses (*)
         `)
         .eq('student_id', user.id)
-        .neq('course_id', MBTI_COURSE_ID) // Exclude MBTI course
+        .neq('course_id', MBTI_COURSE_ID)
         .order('enrolled_at', { ascending: false });
 
       if (error) {
@@ -210,7 +205,6 @@ const EnrolledCourses = () => {
         return;
       }
 
-      // Filter out MBTI course from order items
       const ordersData = data?.map(order => ({
         ...order,
         order_items: order.order_items?.filter(item => 
@@ -219,7 +213,7 @@ const EnrolledCourses = () => {
           course: item.courses,
           price: item.price
         })) || []
-      })).filter(order => order.order_items.length > 0) as Order[]; // Only show orders with non-MBTI courses
+      })).filter(order => order.order_items.length > 0) as Order[];
 
       console.log('Orders fetched:', ordersData);
       setOrders(ordersData || []);
