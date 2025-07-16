@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, ArrowLeft } from 'lucide-react';
@@ -30,7 +29,6 @@ const DriveViewer = () => {
             </CardContent>
           </Card>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -90,8 +88,6 @@ const DriveViewer = () => {
           </p>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

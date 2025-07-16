@@ -1,5 +1,4 @@
 
-import Layout from "@/components/Layout";
 import HeroSection from "@/components/HeroSection";
 import FeaturedPrograms from "@/components/FeaturedPrograms";
 import BenefitsSection from "@/components/BenefitsSection";

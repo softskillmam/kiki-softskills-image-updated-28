@@ -41,11 +41,11 @@ const App = () => {
                 <Route path="career-test" element={<CareerTest />} />
                 <Route path="mbti-test" element={<MBTITestPage />} />
                 <Route path="drive-viewer" element={<DriveViewer />} />
+                <Route path="*" element={<NotFound />} />
               </Route>
               <Route path="login" element={<Login />} />
               <Route path="admin-login" element={<AdminLogin />} />
               <Route path="admin/*" element={<AdminDashboard />} />
-              <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
         </BrowserRouter>
