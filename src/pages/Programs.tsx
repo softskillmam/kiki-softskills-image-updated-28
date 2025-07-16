@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Footer from '@/components/Footer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Users, Star, Phone, MapPin, Loader2 } from 'lucide-react';
@@ -7,6 +6,7 @@ import EnrollButton from '@/components/EnrollButton';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+
 interface Program {
   id: string;
   title: string;
@@ -19,32 +19,30 @@ interface Program {
   age_range: string;
   category: string;
 }
+
 const Programs = () => {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
-  const {
-    toast
-  } = useToast();
-  const {
-    user,
-    isAuthenticated
-  } = useAuth();
+  const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   // MBTI course ID to exclude from programs listing
   const MBTI_COURSE_ID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+
   useEffect(() => {
     fetchPrograms();
   }, [user]);
+
   const fetchPrograms = async () => {
     try {
       // Get all active courses except MBTI course
-      const {
-        data: allCourses,
-        error: coursesError
-      } = await supabase.from('courses').select('*').eq('status', 'active').neq('id', MBTI_COURSE_ID) // Exclude MBTI course
-      .order('created_at', {
-        ascending: true
-      });
+      const { data: allCourses, error: coursesError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('status', 'active')
+        .neq('id', MBTI_COURSE_ID) // Exclude MBTI course
+        .order('created_at', { ascending: true });
+
       if (coursesError) {
         console.error('Error fetching programs:', coursesError);
         toast({
@@ -54,19 +52,22 @@ const Programs = () => {
         });
         return;
       }
+
       let availablePrograms = allCourses || [];
 
       // If user is authenticated, filter out enrolled courses
       if (isAuthenticated && user) {
-        const {
-          data: enrollments,
-          error: enrollmentsError
-        } = await supabase.from('enrollments').select('course_id').eq('student_id', user.id);
+        const { data: enrollments, error: enrollmentsError } = await supabase
+          .from('enrollments')
+          .select('course_id')
+          .eq('student_id', user.id);
+
         if (!enrollmentsError && enrollments) {
           const enrolledCourseIds = enrollments.map(e => e.course_id);
           availablePrograms = allCourses?.filter(course => !enrolledCourseIds.includes(course.id)) || [];
         }
       }
+
       setPrograms(availablePrograms);
     } catch (error) {
       console.error('Error fetching programs:', error);
@@ -79,15 +80,19 @@ const Programs = () => {
       setLoading(false);
     }
   };
+
   if (loading) {
-    return <div className="min-h-screen">
+    return (
+      <div className="min-h-screen">
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-kiki-purple-600" />
         </div>
-        <Footer />
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen">
+
+  return (
+    <div className="min-h-screen">
       <main>
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-kiki-purple-50 via-white to-kiki-blue-50 py-20">
@@ -114,12 +119,24 @@ const Programs = () => {
         {/* Programs Grid */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            {programs.length > 0 ? <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {programs.map(program => <Card key={program.id} className="group overflow-hidden border-0 card-shadow hover:card-shadow-hover transition-all duration-300 hover-scale rounded-2xl">
+            {programs.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {programs.map(program => (
+                  <Card key={program.id} className="group overflow-hidden border-0 card-shadow hover:card-shadow-hover transition-all duration-300 hover-scale rounded-2xl">
                     <div className="relative overflow-hidden">
-                      <img src={program.image_url} alt={program.title} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
+                      <img
+                        src={program.image_url}
+                        alt={program.title}
+                        className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
                       <div className="absolute top-2 left-2">
-                        <Badge className={`text-xs ${program.mode === 'Online' ? 'bg-green-100 text-green-800' : program.mode === 'Offline' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
+                        <Badge className={`text-xs ${
+                          program.mode === 'Online' 
+                            ? 'bg-green-100 text-green-800' 
+                            : program.mode === 'Offline' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-purple-100 text-purple-800'
+                        }`}>
                           {program.mode}
                         </Badge>
                       </div>
@@ -162,7 +179,9 @@ const Programs = () => {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-lg font-bold text-kiki-purple-600">₹{program.price}</span>
-                          {program.original_price && <span className="text-xs text-gray-500 line-through">₹{program.original_price}</span>}
+                          {program.original_price && (
+                            <span className="text-xs text-gray-500 line-through">₹{program.original_price}</span>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -170,8 +189,11 @@ const Programs = () => {
                     <CardFooter className="p-4 pt-0">
                       <EnrollButton courseId={program.id} className="w-full text-sm" />
                     </CardFooter>
-                  </Card>)}
-              </div> : <div className="text-center py-12">
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
                 <div className="text-6xl mb-4">📚</div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   {isAuthenticated ? "All caught up!" : "No programs available"}
@@ -179,11 +201,13 @@ const Programs = () => {
                 <p className="text-gray-600">
                   {isAuthenticated ? "You're enrolled in all available programs." : "Check back later for new programs."}
                 </p>
-              </div>}
+              </div>
+            )}
           </div>
         </section>
       </main>
-      <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default Programs;
