@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Footer from '@/components/Footer';
 import EnrollButton from '@/components/EnrollButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -136,7 +135,6 @@ const CareerTest = () => {
             <p className="text-gray-600">Loading course details...</p>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -297,7 +295,6 @@ const CareerTest = () => {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 };
