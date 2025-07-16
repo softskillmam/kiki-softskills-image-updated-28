@@ -37,6 +37,7 @@ const CourseDetail = () => {
 
   useEffect(() => {
     if (courseId) {
+      console.log('CourseDetail: courseId from params:', courseId);
       fetchCourse();
     }
   }, [courseId]);
@@ -93,6 +94,7 @@ const CourseDetail = () => {
     }
 
     try {
+      console.log('Fetching course with ID:', courseId);
       const { data: courseData, error: courseError } = await supabase
         .from('courses')
         .select('*')
@@ -120,6 +122,7 @@ const CourseDetail = () => {
         return;
       }
 
+      console.log('Course data fetched:', courseData);
       setCourse(courseData);
     } catch (error) {
       console.error('Error fetching course:', error);

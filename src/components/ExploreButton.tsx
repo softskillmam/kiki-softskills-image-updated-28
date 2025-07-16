@@ -13,6 +13,7 @@ const ExploreButton = ({ courseId, courseName }: ExploreButtonProps) => {
   const navigate = useNavigate();
 
   const handleExplore = () => {
+    console.log('Navigating to course:', courseId);
     navigate(`/course/${courseId}`);
   };
 
