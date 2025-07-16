@@ -1,9 +1,10 @@
 import React from 'react';
-import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, Award, Target, Heart, Phone, MapPin, Mail } from 'lucide-react';
+
 const About = () => {
-  return <div className="min-h-screen">
+  return (
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-kiki-purple-50 via-white to-kiki-blue-50 py-20">
         <div className="container mx-auto px-4 text-center">
@@ -190,8 +191,8 @@ const About = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default About;

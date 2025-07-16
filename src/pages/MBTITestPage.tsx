@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Footer from '@/components/Footer';
 import MBTIQuiz from '@/components/MBTIQuiz';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -149,7 +147,6 @@ const MBTITestPage = () => {
         <div className="flex items-center justify-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kiki-purple-600"></div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -231,7 +228,6 @@ const MBTITestPage = () => {
           />
         )}
       </main>
-      <Footer />
     </div>
   );
 };
