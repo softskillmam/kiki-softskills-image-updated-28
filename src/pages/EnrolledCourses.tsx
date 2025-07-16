@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,12 +64,17 @@ const EnrolledCourses = () => {
     if (user) {
       fetchEnrollments();
       fetchOrders();
-      setupRealtimeSubscriptions();
+      
+      // Set up real-time subscriptions
+      const cleanup = setupRealtimeSubscriptions();
+      
+      // Return cleanup function for useEffect
+      return cleanup;
     }
   }, [user]);
 
   const setupRealtimeSubscriptions = () => {
-    if (!user?.id) return;
+    if (!user?.id) return () => {};
 
     console.log('Setting up real-time subscriptions for user:', user.id);
 
@@ -138,7 +142,7 @@ const EnrolledCourses = () => {
       )
       .subscribe();
 
-    // Cleanup function
+    // Return cleanup function
     return () => {
       console.log('Cleaning up real-time subscriptions');
       supabase.removeChannel(enrollmentChannel);
